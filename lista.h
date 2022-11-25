@@ -1,97 +1,66 @@
-#ifndef LISTA_H_INCLUDED
-#define LISTA_H_INCLUDED
+#ifndef __LISTA__
+#define __LISTA__
+#include "nodo_lista.h"
 
-#include "nodo.h"
-
-class Lista {
-        //Atributos
+class Lista{
+    //Atributos
     private:
-        Nodo* primero;
-        Nodo* ultimo;
+        Nodo_lista* primero;
+        Nodo_lista* actual;
         int cantidad;
 
-        //Metodos
+    //Metodos
     public:
-        //Constructor de Lista
-        /*
-         *POST:
-         *      Construye un objeto Lista vacia
-         */
+        //Constructor sin parametros.
+        //pre: -
+        //pos: Construye una lista vacia apuntando a 0 con 0 elementos.
         Lista();
 
-        //Destructor de Lista
-        /*
-         *POST:
-         *      Destruye el objeto Lista y a su vez libera el espacio de memoria dinamica pedido
-         */
-        ~Lista();
+        //pre: 0 <= posicion <= (cantidad-1).
+        //pos: Devuelve un puntero al nodo de la lista en la posicion del parametro posicion.
+        Nodo_lista* obtener_nodo(int posicion);
 
-        //Agrega un Nodo a la lista
-        /*
-         *PRE:
-         *      Recibe una direccion de memoria de un objeto de Animal para poder instanciar un objeto de Nodo
-         *POST:
-         *      Instancia un nuevo objeto de Nodo con memoria dinamica, lo agrega a la lista y aumenta el atributo cantidad
-         */
-        void alta(Animal* animal);
-
-        //Devuelve una direccion de memoria de un objeto de Animal
-        /*
-         *PRE:
-         *      Recibe string para poder hacer la comparacion
-         *POST:
-         *      En caso de existir el string recibido devuelve una direccion de memoria de un objeto de Animal, en caso contrario devuelve 0. Tambien devolvera 0 si la lista esta vacia.
-         */
-        Animal* consulta(string nombre);
-
-        //Quita un Nodo de la lista
-        /*
-         *PRE:
-         *      Recibe string para poder hacer la comparacion y la lista no debe estar vacia
-         *POST:
-         *      Si existe el string, busca el nodo anterior y a dicho nodo le asigana su atributo siguiente la direccion de memoria del siguiente nodo al que queremos dar de baja, se elimina de la lista el nodo que queremos dar de baja, se libera la memoria dinamica reservada y se diminuye la cantidad
-         */
-        void baja(string nombre);
-
-        //Corrobora si la lista esta vacia
-        /*
-         *POST:
-         *      Devuelve true si el atributo cantidad es igual a 0, en caso cotrario devuelve false
-         */
-        bool vacia();
-
-        //Devuelve la direccion de memoria del primer nodo de la lista
-        /*
-         *POST:
-         *      Devuelve la direccion de memoria del primer nodo de la lista si no hay un primer nodo devuelve 0
-         */
-        Nodo* obtener_primero();
-
-        //Devuelve la cantidad de nodos que hay en la lista
-        /*
-         *POST:
-         *      Devuelve la cantidad de nodos que hay en la lista
-         */
+        //pre: -
+        //pos: Devuelve la cantidad de nodos.
         int obtener_cantidad();
 
-    private:
-        //Devuelve la direccion de memoria del nodo buscado en la lista
-        /*
-         *PRE:
-         *      Recibe string para poder hacer la comparacion
-         *POST:
-         *      Si se encuentra el string recibido en las comparaciones se devuelve la direccion de memoria del nodo buscado en la lista, en caso de no encotrar dicho string se devuelve 0
-         */
-        Nodo* obtener_nodo(string nombre);
+        //Agrega un nodo.
+        //pre: 0 <= posicion <= cantidad.
+        //pos: Se crea y agrega un nodo con dato = dato en posicion del parametro posicion reestructurando la lista.
+        void alta(Dato dato, int posicion);
 
-        //Devuelve la direccion de memoria del nodo anterior al nodo actual en la lista
-        /*
-         *PRE:
-         *      Recibe un nodo actual para poder realizar la busqueda
-         *POST:
-         *      Devuelve la direccion de memoria del nodo anterior al nodo actual en la lista
-         */
-        Nodo* obtener_nodo_anterior(Nodo* actual);
+        //Elimina un nodo
+        //pre: 0 <= posicion <= (cantidad-1).
+        //pos: Se elimina el nodo en la posicion del parametro posicion y reestructura la lista.
+        void baja(int posicion);
+
+        //pre: 0 <= posicion < cantidad.
+        //pos: Devuelve el dato del nodo en la posicion del parametro posicion.
+        Dato* consulta(int posicion);
+
+        //pre: -
+        //pos: Devuelve true si la lista esta vacia, false sino.
+        bool vacia();
+        
+        //pre: -
+        //pos: Apunta actual al primer nodo de la lista.
+        void reiniciar_actual();
+
+        //pre: -
+        //pos: Devuelve true si hay un nodo despues de actual, false sino.
+        bool hay_siguiente_actual();
+
+        //pre: -
+        //pos: Devuelve el dato de actual.
+        Dato* obtener_dato_actual();
+
+        //pre: Debe haber un nodo despues de actual.
+        //pos: Apunta actual al siguiente nodo.
+        void siguiente_actual();
+
+        //Destruye la lista.
+        //pre: -
+        //pos:Destruye la lista y libera la memoria reservada de cada nodo.
+        ~Lista();
 };
-
-#endif // LISTA_H_INCLUDED
+#endif
