@@ -1,18 +1,45 @@
 #include "nodo.h"
 
-Nodo::Nodo(Animal* animal) {
-    this->animal = animal;
-    siguiente = 0;
+Nodo::Nodo () {
+	cantidad_claves = 0;
+	
+	es_hoja = true;
+
+	for (int i = 0; i < MAXIMAS_CLAVES; i++)
+		claves[i] = NULL;
+
+	for (int i = 0; i < MAXIMOS_HIJOS; i++)
+		hijos[i] = NULL;
 }
 
-void Nodo::cambiar_siguiente(Nodo* siguiente) {
-    this->siguiente = siguiente;
+int Nodo::obtener_cantidad_claves () {
+	return cantidad_claves;
 }
 
-Nodo* Nodo::obtener_siguiente() {
-    return siguiente;
+void Nodo::cambiar_cantidad_claves (int nueva_cantidad) {
+	cantidad_claves = nueva_cantidad;
 }
 
-Animal* Nodo::obtener_dato() {
-    return animal;
+bool Nodo::sera_hoja () {
+	return es_hoja;
+}
+
+void Nodo::ramificar () {
+	es_hoja = false;
+}
+
+Animal* Nodo::obtener_clave (int posicion) {
+	return claves[posicion];
+}
+
+void Nodo::cambiar_clave (int posicion, Animal* nueva_clave) {
+	claves[posicion] = nueva_clave;
+}
+
+Nodo* Nodo::obtener_hijo (int posicion) {
+	return hijos[posicion];
+}
+
+void Nodo::cambiar_hijo (int posicion, Nodo* nuevo_hijo) {
+	hijos[posicion] = nuevo_hijo;
 }
