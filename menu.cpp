@@ -160,22 +160,42 @@ void Menu::adoptar () {
 		pasar_tiempo();
 		
 		int espacio_disponible = ingresar_metros();
+		
+		int total_animales = refugio.obtener_cantidad();
+		int cantidad_adoptados = 0; // contador de animales a adoptar
+		
+		Animal** posibles_adoptados = new Animal*[total_animales]; // creo vector de punteros a animales, su tamaño es el total de animales existentes
 	
-		int contador = 1;
+		asignar_posibles_adoptados(espacio_disponible, posibles_adoptados, cantidad_adoptados);
+		
+		ordenar_posibles_adoptados(posibles_adoptados, cantidad_adoptados);
 	
-		string opciones_adopcion[refugio.obtener_cantidad()];
+		mostrar_posibles_adoptados(posibles_adoptados, cantidad_adoptados);
 	
-		asignar_posibles_adoptados(espacio_disponible, opciones_adopcion, contador);
+		int opcion = corroborar_adopcion (cantidad_adoptados);
+		string nombre_animal_adoptar = posibles_adoptados[opcion] -> obtener_nombre();
 	
-		mostrar_posibles_adoptados (opciones_adopcion, contador);
+		if (opcion >= 0) { // recorrer lista refugio y encontrar el nodo que contenga el animal con el nombre de posibles_adoptados[opcion]
+			
+			cout << "Has adoptado a: " << nombre_animal_adoptar << endl;
+			
+			/*
+			int i = 0;
+			while(nombre_animal_adoptar != nodo(i)->obtener_nombre() ){
+				i++;
+			}
+			
+			refugio.baja(i);
+			
+			*/
 	
-		int opcion = corroborar_adopcion (contador);
-	
-		if (opcion) {
-			refugio.baja(opciones_adopcion[opcion - 1]);
-	
-			cout << "Has adoptado a: " << opciones_adopcion[opcion - 1] << endl;
 		}
+		
+		// libero memoria 
+		for(int i = cantidad_adoptados + 1; i < total_animales + 1; i++){
+			delete posibles_adoptados[i];
+		}
+		delete[] posibles_adoptados;
 	}
 	presionar_enter ();
 }
@@ -535,60 +555,77 @@ int Menu::ingresar_metros () {
 	return metros;
 }
 
-void Menu::asignar_posibles_adoptados (int espacio_disponible, string opciones_adopcion[], int &contador) {
-	Nodo* auxiliar = refugio.obtener_primero();
-	
-	Animal* mascota;
+void Menu::asignar_posibles_adoptados (int espacio_disponible, Animal** posibles_adoptados, int &cantidad_adoptados) {
+	Nodo* auxiliar = refugio.obtener_nodo(0); // inicializo nodo
+	Animal* mascota = auxiliar -> obtener_dato();
 
 	while (auxiliar != NULL) {
-		mascota = auxiliar -> obtener_dato();
+		mascota = auxiliar -> obtener_dato(); // obtengo el objeto animal a guardar en el vector posibles_adoptados
 		
 		if (espacio_disponible < ESPACIO_INFERIOR) {
 			if (mascota -> obtener_tamanio() == DIMINUTO || mascota -> obtener_tamanio() == PEQUENIO) {
-				opciones_adopcion[contador - 1] = mascota -> obtener_nombre();
-				contador++;
+				posibles_adoptados[cantidad_adoptados] = mascota;
+				cantidad_adoptados++;
 			}
 		}
 		else if (espacio_disponible >= ESPACIO_INFERIOR && espacio_disponible < ESPACIO_INTERMEDIO) {
 			if(mascota -> obtener_tamanio() == DIMINUTO || mascota -> obtener_tamanio() == PEQUENIO || mascota -> obtener_tamanio() == MEDIANO) {
-				opciones_adopcion[contador - 1] = mascota -> obtener_nombre();
-				contador++;
+				posibles_adoptados[cantidad_adoptados] = mascota;
+				cantidad_adoptados++;
 			}
 		}
 		else if (espacio_disponible >= ESPACIO_INTERMEDIO && espacio_disponible < ESPACIO_SUPERIOR) {
 			if (mascota -> obtener_tamanio() == DIMINUTO || mascota -> obtener_tamanio() == PEQUENIO || mascota -> obtener_tamanio() == MEDIANO || mascota -> obtener_tamanio() == GRANDE) {
-				opciones_adopcion[contador - 1] = mascota -> obtener_nombre();
-				contador++;
+				posibles_adoptados[cantidad_adoptados] = mascota;
+				cantidad_adoptados++;
 			}
 		}
 		else { 
-				opciones_adopcion[contador - 1] = mascota -> obtener_nombre();
-				contador++;
+				posibles_adoptados[cantidad_adoptados] = mascota;
+				cantidad_adoptados++;
 		}
 		auxiliar = auxiliar -> obtener_siguiente();
 	}
 }
 
-void Menu::mostrar_posibles_adoptados (string opciones_adopcion[], int contador) {
+void ordenar_posibles_adoptados(Animal** posibles_adoptados, int cantidad_adoptados){
+	
+	Animal* mascota_insertar;
+	int contador_aux;
+	
+	for(int i = 1; i < cantidad_adoptados; i++){
+		
+		contador_aux = i;
+		mascota_insertar = posibles_adoptados[i];
+		
+		while(contador_aux > 0 && (mascota_insertar -> obtener_edad()) > (posibles_adoptados[contador_aux - 1] -> obtener_edad()) ){
+			posibles_adoptados[contador_aux] = posibles_adoptados[contador_aux - 1];
+			contador_aux--;
+		}
+		
+		posibles_adoptados[contador_aux] = mascota_insertar;
+	}
+}
+
+void Menu::mostrar_posibles_adoptados (Animal** posibles_adoptados, int cantidad_adoptados) {
 	system("clear");
 	
 	cout << "\tNombre         Edad           Tamanio        Especie        Personalidad   Hambre         Higiene" << endl;
-	for (int i = 0; i < (contador - 1); i++) {
-		cout << i+1 << "\t";
-		refugio.consulta(opciones_adopcion[i])-> caracteristicas();
-	}
+	for (int i = 0; i < (cantidad_adoptados + 1); i++) {
+		cout << i << "\t";
+		posibles_adoptados[i] -> caracteristicas();
 }
 
 int Menu::corroborar_adopcion (int comparador) {
 	int opcion;
 
-	cout << endl << "Ingrese el numero correspondiente al animal que desea adoptar o si quiere cancelar la opcion ingrese 0" << endl;
+	cout << endl << "Ingrese el numero correspondiente al animal que desea adoptar o si quiere cancelar la opcion ingrese -1" << endl;
 
 	cin >> opcion;
 
-	while (opcion >= comparador || opcion < MINIMO) {
+	while (opcion > comparador || opcion < MINIMO) {
 		cout << "Erro opcion invalida." << endl;
-		cout << "Ingrese el numero correspondiente al animal que desea adoptar o si quiere cancelar la opcion ingrese 0" << endl;
+		cout << "Ingrese el numero correspondiente al animal que desea adoptar o si quiere cancelar la opcion ingrese -1" << endl;
 		cin >> opcion;
 	}
 

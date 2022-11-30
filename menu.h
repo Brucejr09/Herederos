@@ -295,28 +295,38 @@ class Menu {
 		 */
 		int ingresar_metros ();
 		
-		//Asigna a un vector de string todos los posibles nombres de animales a ser adoptados
+		//
 		/*
 		 *PRE:
-		 *		La lista no puede estar vacia, recibe el espacio disponible, el vector de string a completar y su tope por referencia para que vaya aumentando dependiendo de los candidatos
+		 *		La lista no puede estar vacia, recibe el espacio disponible, el vector de punteros y la cantidad de animales a adoptar
 		 *POST:
-		 *		Asigna a un vector de string todos los posibles nombres de animales a ser adoptado corroborando el espacio disponible ingresado por el usuario para cada animal
+		 *		Asigna a un vector de punteros a todos los posibles animales a ser adoptados corroborando el espacio disponible ingresado por el usuario para cada animal
 		 */
-		void asignar_posibles_adoptados (int espacio_disponible, string opciones_adopcion[], int &contador);
+		void asignar_posibles_adoptados (int espacio_disponible, Animal** posibles_adoptados, int &cantidad_adoptados);
 		
-		//Muestra por pantalla todos los posibles nombres candidatos a ser adoptados
-		/*
-		 *POST:
-		 *		Muestra por pantalla todos los posibles nombres candidatos a ser adoptados con su correspondiente numero asignado
-		 */
-		void mostrar_posibles_adoptados (string opciones_adopcion[], int contador);
 		
-		//Devuelve un entero entre 0 y el tope maximo de nombres candidatos a ser adoptados
+		//
 		/*
 		 *PRE:
-		 *		El usuario debe ingresar un numero necesariamente no puede ingresar un caracter y recibe un comparador que sera el tope maximo de nombres candidatos a ser adoptados
+		 *		-
 		 *POST:
-		 *		Devuelve un entero entre 0 y tope maximo de nombres candidatos a ser adoptados, devuelve 0 si quiere cancelar la adopcion
+		 *		Ordena el vector de posibles animales adoptados de mayor a menor edad
+		 */
+		void ordenar_posibles_adoptados(Animal** posibles_adoptados, int cantidad_adoptados);
+		
+		//
+		/*
+		 *POST:
+		 *		Muestra por pantalla las caracteristicas de todos los posibles animales candidatos a ser adoptados con su correspondiente numero asignado
+		 */
+		void mostrar_posibles_adoptados (Animal** posibles_adoptados, int cantidad_adoptados);
+		
+		//
+		/*
+		 *PRE:
+		 *		El usuario debe ingresar un numero necesariamente no puede ingresar un caracter y recibe un comparador que sera el tope maximo de animales candidatos a ser adoptados
+		 *POST:
+		 *		Devuelve un entero entre 0 y tope maximo de nombres candidatos a ser adoptados, devuelve -1 si quiere cancelar la adopcion
 		 */
 		int corroborar_adopcion (int comparador);
 };

@@ -14,7 +14,7 @@ const int ESPACIO_ASIGNADO = 15;
 const int HAMBRE_HABITUAL = 10;
 const int HIGIENE_HABITUAL = 10;
 
-const int MINIMO = 0;
+const int MINIMO = -1;
 const int MAXIMO = 100;
 
 const int PRIMERA_OPCION = 1;
