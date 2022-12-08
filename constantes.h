@@ -14,16 +14,23 @@ const int ESPACIO_ASIGNADO = 15;
 const int HAMBRE_HABITUAL = 10;
 const int HIGIENE_HABITUAL = 10;
 
-const int MINIMO = -1;
+const int MINIMO = 0;
 const int MAXIMO = 100;
 
 const int PRIMERA_OPCION = 1;
 const int SEGUNDA_OPCION = 2;
-const int SALTEAR = 3;
+const int TERCERA_OPCION = 3;
+const int CUARTA_OPCION = 4;
+
+const int ELEGIR = 1;
+const int REGRESAR = 2;
 
 const int ESPACIO_INFERIOR = 10;
 const int ESPACIO_INTERMEDIO = 20;
 const int ESPACIO_SUPERIOR = 50;
+
+const int MAXIMAS_CLAVES = 3;
+const int MAXIMOS_HIJOS = 4;
 
 //Constantes de cadenas de caracteres
 
@@ -51,7 +58,7 @@ const char ERIZO = 'E';
 const char LAGARTIJA = 'L';
 const char DELIMITADOR = ',';
 
-//Enumeradores usados como constantes
+//Enumerador usado como constantes
 
 enum Acciones {
 	LISTAR = 1,
@@ -59,14 +66,8 @@ enum Acciones {
 	BUSCAR,
 	CUIDAR,
 	ADOPTAR,
+	CARGAR,
 	GUARDAR_SALIR,
-};
-
-enum Mini_acciones {
-	ELEGIR = 1,
-	ALIMENTAR,
-	BANIAR,
-	REGRESAR,
 };
 
 //Estructura para el guardado de informacion

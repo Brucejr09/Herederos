@@ -4,6 +4,11 @@ Arbol::Arbol () {
 	raiz = new Nodo();
 }
 
+Arbol::~Arbol () {
+    if (memoria_liberada(raiz))
+        raiz = nullptr;
+}
+
 Nodo* Arbol::obtener_raiz () {
     return raiz;
 }
@@ -29,7 +34,6 @@ Animal* Arbol::busqueda (Nodo* actual, string nombre) {
         return busqueda(actual->obtener_hijo(posicion), nombre);
 }
 
-
 void Arbol::insertar (Animal* animal) {
     Nodo* raiz_auxiliar = raiz;
 
@@ -44,6 +48,10 @@ void Arbol::insertar (Animal* animal) {
         nueva_raiz->cambiar_hijo(0, raiz_auxiliar);
         dividir_nodo(nueva_raiz, 0, raiz_auxiliar);
     }    
+}
+
+void Arbol::mostrar_arbol () {
+    mostrar_subarbol(raiz);
 }
 
 void Arbol::insertar_en_hoja(Nodo* &actual, Animal* animal) {
@@ -105,7 +113,7 @@ void Arbol::dividir_nodo (Nodo* &padre, int posicion_hijo, Nodo* &hijo) {
 
     //Mueve las claves de padre
     for (int j = padre->obtener_cantidad_claves(); j > posicion_hijo; j--)
-        padre->cambiar_clave(j + 1, padre->obtener_clave(j));
+        padre->cambiar_clave(j, padre->obtener_clave(j - 1));
 
     //Agrega la clave situada en el medio
     padre->cambiar_clave(posicion_hijo, hijo->obtener_clave(1));
@@ -140,9 +148,7 @@ bool Arbol::memoria_liberada (Nodo* &candidato) {
     return liberado;
 }
 
-void Arbol::mostrar_arbol () {
-    mostrar_subarbol(raiz);
-}
+
 
 void Arbol::mostrar_subarbol (Nodo* actual) {
     for (int i = 0; i < actual->obtener_cantidad_claves(); i++)
@@ -156,9 +162,4 @@ void Arbol::mostrar_subarbol (Nodo* actual) {
                 mostrar_subarbol(actual->obtener_hijo(j));
         }
     }
-}
-
-Arbol::~Arbol () {
-    if (memoria_liberada(raiz))
-        raiz = nullptr;
 }

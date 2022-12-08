@@ -11,8 +11,9 @@ class Animal{
 		string tamanio;
 		string especie;
 		string personalidad;
-		int hambre = 0;
-		int higiene = 100;
+		int hambre;
+		int higiene;
+		bool adoptado;
 	
 	//Metodos
 	public:
@@ -104,12 +105,40 @@ class Animal{
 		 */
 		string obtener_especie();
 		
-		//Devuelve el nombre
+		//Devuelve la personalidad
 		/*
 		 *POST:
 		 *		Devuelve el atributo personalidad
 		 */
 		string obtener_personalidad();
+
+		//Devuelve el hambre
+		/*
+		 *POST:
+		 *		Devuelve el atributo hambre
+		 */
+		int obtener_hambre();
+
+		//Devuelve la higiene
+		/*
+		 *POST:
+		 *		Devuelve el atributo higiene
+		 */
+		int obtener_higiene();
+
+		//Devuelve adoptado
+		/*
+		 *POST:
+		 *		Devuelve el atributo adoptado
+		 */
+		bool obtener_adoptado();
+
+		//Cambia el valor del atributo adoptado
+		/*
+		 *POST:
+		 *		Le asigna al atributo adoptado true
+		 */
+		void fue_adoptado();
 		
 	private:
 		//Separa las palabras con una cierta cantidad de espacios asignados

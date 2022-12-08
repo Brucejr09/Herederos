@@ -2,13 +2,16 @@
 #define __VERTICE__
 #include "baldosa.h"
 
+const int INFINITO = -1;
+
 class Vertice{
     //Atributos
 private:
+    Coordenada posicion;
     Vertice* anterior;
-    Baldosa baldosa;
     bool visitado;
     int peso;
+    int distancia;
 
     //Metodos
 public:
@@ -18,11 +21,11 @@ public:
 
     //pre:
     //pos:
-    Vertice( Vertice &copia);
+    Vertice(const Vertice &copia);
 
     //pre:
     //pos:
-    Vertice(Baldosa baldosa, bool visitado, Vertice* anterior, int peso);
+    Vertice(int distancia, bool visitado, Vertice* anterior, int peso, int fila, int columna);
 
     //pre:
     //pos:
@@ -38,7 +41,7 @@ public:
 
     //pre:
     //pos:
-    Baldosa obtener_baldosa();
+    int obtener_distancia();
 
     //pre:
     //pos:
@@ -47,6 +50,10 @@ public:
     //pre:
     //pos:
     int obtener_peso();
+
+    //pre:
+    //pos:
+    Coordenada obtener_posicion();
 
     //pre:
     //pos:

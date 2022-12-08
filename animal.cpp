@@ -5,6 +5,9 @@ Animal::Animal(string nombre, int edad, string tamanio,  string personalidad){
 	this -> edad = edad;
 	this -> tamanio = tamanio;
 	this -> personalidad = personalidad;
+	hambre = 0;
+	higiene = 100;
+	adoptado = false;
 }
 
 Animal::~Animal(){}
@@ -22,13 +25,19 @@ void Animal::baniar(){
 }
 
 void Animal::caracteristicas(){
+	string estado;
+
 	cout << nombre << espaciar_palabras(nombre.size(), ESPACIO_ASIGNADO);
 	cout << edad << espaciar_palabras((to_string(edad)).size(), ESPACIO_ASIGNADO);
 	cout << tamanio << espaciar_palabras(tamanio.size(), ESPACIO_ASIGNADO);
 	cout << especie << espaciar_palabras(especie.size(), ESPACIO_ASIGNADO);
 	cout << personalidad << espaciar_palabras(personalidad.size(), ESPACIO_ASIGNADO);
 	cout << hambre << espaciar_palabras((to_string(hambre)).size(), ESPACIO_ASIGNADO);
-	cout << higiene << espaciar_palabras((to_string(hambre)).size(), ESPACIO_ASIGNADO) << endl;
+	cout << higiene << espaciar_palabras((to_string(higiene)).size(), ESPACIO_ASIGNADO);
+	if (adoptado)
+		cout << "Ausente" << endl;
+	else
+		cout << "Presente" << endl;
 }
 
 void Animal::modificar_higiene_hambre(){
@@ -118,6 +127,22 @@ string Animal::obtener_especie() {
 
 string Animal::obtener_personalidad() {
 	return personalidad;
+}
+
+int Animal::obtener_hambre() {
+	return hambre;
+}
+
+int Animal::obtener_higiene() {
+	return higiene;
+}
+
+bool Animal::obtener_adoptado(){
+	return adoptado;
+}
+
+void Animal::fue_adoptado(){
+	adoptado = true;
 }
 
 string Animal::espaciar_palabras(int tamanio_caracteristica, int espacio_asignado){

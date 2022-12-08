@@ -1,15 +1,21 @@
 #ifndef MENU_H_INCLUDED
 #define MENU_H_INCLUDED
 
-#include "lista.h"
+#include "arbol.h"
+#include "mapa.h"
 
 class Menu {
 	//Atributos
 	private:
-		Lista refugio;
+		Arbol diccionario;
+		int combustible;
+		int escapados;
+		bool cancelado;
 
 	//Metodos
 	public:
+		Menu ();
+
 		//Devuelve un booleano
 		/*
 		 *POST:
@@ -33,26 +39,22 @@ class Menu {
 		 */
 		void mostrar ();
 		
-		//Muestra por pantalla todas las caracteristicas de todos los elementos de la lista
+		//Muestra por pantalla todas las caracteristicas de todos los elementos del Arbol
 		/*
-		 *PRE:
-		 *		La lista debe de estar inicializada y cargada, si la lista esta vacia no realizara ninguna accion
 		 *POST:
 		 *		Muestra por pantalla todas las caracteristicas de todos los elementos de la lista
 		 */
 		void listar ();
 		
-		//Agrega un nuevo animal a la lista
+		//Agrega un nuevo animal al Arbol
 		/*
 		 *POST:
-		 *		El usuario debe introducir un nombre, si el nombre ya existe se le pedira que ingrese uno nuevo y si no quiere ingresa 0 para volver al menu principal, ahora si no existe se le pedira que ingrese las caracteristicas validas de dicho animal
+		 *		El usuario hace un recorrido por la reserva para rescarar a un animal aleatorio
 		 */
 		void rescatar ();
 		
 		//Muestra las caracteristicas de un animal
 		/*
-		 *PRE:
-		 *		La lista debe de estar inicializada y cargada, si la lista esta vacia no realizara ninguna accion
 		 *POST:
 		 *		El usuario debe introducir un nombre si existe se mostrara por pantalla las caracteristicas de dicho animal, en caso contrario se mostrara un error en la pantalla
 		 */
@@ -60,21 +62,26 @@ class Menu {
 		
 		//Alimenta e higieniza a los animales
 		/*
-		 *PRE:
-		 *		La lista debe de estar inicializada y cargada, si la lista esta vacia no realizara ninguna accion
 		 *POST:
-		 *		Se le mostrar un mini menu al usuaria para que elija entre cuidar individualmente a los animales, alimentar a todos los animales, baniar a todos los animales o regresar al menu
+		 *		Se le mostrara un mini menu al usuaria para que elija entre cuidar individualmente o regresar al menu
 		 */
 		void cuidar ();
 		
-		//Quita a un animal de la lista
+		//Quita a un animal del Arbol
 		/*
-		 *PRE:
-		 *		La lista debe de estar inicializada y cargada, si la lista esta vacia no realizara ninguna accion
 		 *POST:
-		 *		Le pide al usuario que ingrese su espacio disponible y le muesta por pantalla los animales que cumplen dicha caracteristica, si lo quiere el usuario ingresa su correspondiente numero y se elimina al animal de la lista, si no lo quiere ingresa 0
+		 *		Le pide al usuario que ingrese su espacio disponible y le muesta por pantalla los animales que cumplen dicha caracteristica, ordenados de mayor a menor por edad, si lo quiere el usuario ingresa su correspondiente numero y se elimina al animal del Arbol, si no lo quiere ingresa -1
 		 */
 		void adoptar ();
+
+		//Carga combustible en el tanque
+		/*
+		 *PRE:
+		 *		El usuario debe ingresar un numero entero
+		 *POST:
+		 *		El usuario ingresa la cantidad de combustible que desea agregar, si el atributo combustible es igual a 100 se le informara al usuario de antemano que no podra agregarle mas combustible
+		 */
+		void cargar_combustible ();
 		
 		//Guarda el archivo actualizado
 		/*
@@ -82,6 +89,14 @@ class Menu {
 		 *		Devuelve true si el archivo actualizado se pudo guardar correctamente y en caso contrario devuelve false
 		 */
 		bool guardar_salir ();
+
+		//Devuelve cancelado
+		/*
+		 *POST:
+		 *		Devuelve el atributo cancelado
+		 */
+		bool clausurado ();
+
 	private: 
 		//El programa continuara con su ejecucion luego que el usuario precione la tecla ENTER
 		/*
@@ -115,7 +130,7 @@ class Menu {
 		 *POST:
 		 *		Dependiendo de la personalidad del animal se le sumara el hambre y se le descontara la higiene correspondiente a todos los animales de la lista
 		 */
-		void pasar_tiempo ();
+		void pasar_tiempo (Nodo* &actual);
 		
 		//Agrega un animal a la lista
 		/*
@@ -248,7 +263,7 @@ class Menu {
 		 *POST:
 		 *		Recorre la lista pasando por todos los animales y el usuario elege entre alimentar, baniar o saltear al animal
 		 */
-		void elegir_individualmente ();
+		void elegir_individualmente (Nodo* actual, bool &salir);
 		
 		//Devuelve un entero entre 1 y 3 ambos inclusive
 		/*
@@ -267,24 +282,49 @@ class Menu {
 		 *		Corrobora que el numero ingresado por el usuario esta entre 1 y 3, ambos inclusive, de caso contrario le pide que ingrese uno nuevo
 		 */
 		void validar_accion_individual (int &accion);
-		
-		//Alimenta a todos los animales de la lista
+
+		//Actualiza el archivo
 		/*
 		 *PRE:
-		 *		La lista no debe estar vacia
+		 *		Recibe la direccion de memoria del objeto de Nodo del cual debe comenzar la actualizacion y recibe el archivo abierto en modo de escritura
 		 *POST:
-		 *		Cambia 0 el atributo hambre de cada animal de la lista
+		 *		Actualiza el archivo en caso de haber cambios
 		 */
-		void alimentar_a_todos ();
-		
-		//Bania a todos los animales de la lista
+		void actualizar_archivo (Nodo* actual, ofstream &refugio_actualizado);
+
+		//Corrobora que el numero ingresado por el usuario este en rango
 		/*
 		 *PRE:
-		 *		La lista no debe estar vacia
+		 *		Recibe un numero para corroborar si esta en rango
 		 *POST:
-		 *		Cambia 100 el atributo higiene de cada animal de la lista
+		 *		Corrobora que el numero ingresado por el usuario esta en un rango el cual no permita que el atributo combustible sea mayor que 100, de caso contrario le pide que ingrese uno nuevo
 		 */
-		void baniar_a_todos ();
+		void validar_combustible (int &carga);
+
+		//El usuario debe ingresar la cantidad de combustible que desea agregar
+		/*
+		 *PRE:
+		 *		El valor ingresado por el usuario debe ser un numero entero
+		 *POST:
+		 *		Devuelve la cantidad de combustible que agrego el usuario
+		 */
+		int pedir_combustible ();
+		
+		//Aumenta el valor del combustible
+		/*
+		 *PRE:
+		 *		Recibe un entero mayor a 0
+		 *POST:
+		 *		Mientras que el incremento recibido no logre que el combustible sea mayor a 100, se le incrementara dicho valor al atributo combustible, caso contrario se mantendra en 100
+		 */
+		void agregar_combustible (int carga);
+
+		//Hace que todos los animales queden adoptados de manera recursiva
+		/*
+		 *POST:
+		 *		Hace que todos los aniamales (claves) del Arbol queden adoptados de manera recursiva
+		 */
+		void clausurar (Nodo* &actual);
 
 		//Devuelve los metros disponibles
 		/*
@@ -302,8 +342,7 @@ class Menu {
 		 *POST:
 		 *		Asigna a un vector de punteros a todos los posibles animales a ser adoptados corroborando el espacio disponible ingresado por el usuario para cada animal
 		 */
-		void asignar_posibles_adoptados (int espacio_disponible, Animal** posibles_adoptados, int &cantidad_adoptados);
-		
+		void asignar_posibles_adoptados (Nodo* actual, int espacio_disponible, Animal** posibles_adoptados, int &cantidad_adoptados);
 		
 		//
 		/*

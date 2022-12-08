@@ -1,5 +1,11 @@
 #include "menu.h"
 
+Menu::Menu () {
+	combustible = 100;
+	escapados = 0;
+	cancelado = false;
+}
+
 bool Menu::lista_asignada () {
 	return (procesar_archivo() == 0);
 }
@@ -19,184 +25,205 @@ void Menu::mostrar () {
 	cout << "3.\tBuscar" << endl;
 	cout << "4.\tCuidar" << endl;
 	cout << "5.\tAdoptar" << endl;
-	cout << "6.\tGuardar y salir" << endl << endl;
+	cout << "6.\tCargar combustible" << endl;
+	cout << "7.\tGuardar y salir" << endl << endl;
 }
 
 void Menu::listar () {
-	if (refugio.vacia())
-		cout << "El refugio no posee animales por el momento, no se puede realizar dicha accion." << endl;
-	else {
-		pasar_tiempo();
+	system("clear");
+
+	Nodo* temporal = diccionario.obtener_raiz();
 	
-		Nodo* auxiliar = refugio.obtener_primero();
+	pasar_tiempo(temporal);
 		
-		cout << endl << "Nombre         Edad           Tamanio        Especie        Personalidad   Hambre         Higiene" << endl;
+	cout << endl << "Nombre         Edad           Tamanio        Especie        Personalidad   Hambre         Higiene        Estado" << endl;
 	
-		while (auxiliar != NULL) {
-			( auxiliar -> obtener_dato() )-> caracteristicas();
-	
-			auxiliar = auxiliar -> obtener_siguiente();
-		}
-	}
+	diccionario.mostrar_arbol();
 
 	presionar_enter ();
 }
 
 void Menu::rescatar () {
-	if (!refugio.vacia()) 
-		pasar_tiempo();
+	system("clear");
 
-	Descripcion nuevo_animal;
+	Nodo* temporal = diccionario.obtener_raiz();
 	
-	cout << endl << "Ingrese un nombre:" << endl;
+	pasar_tiempo(temporal);
 
-	cin.ignore();
+	cout << endl;
 
-	getline(cin, nuevo_animal.nombre);
+	Mapa mapa;
+
+	Animal* rescatado;
 	
-	while ( refugio.consulta(nuevo_animal.nombre) && (nuevo_animal.nombre != "0") ) {
-		cout << "El animal de nombre " << refugio.consulta(nuevo_animal.nombre) -> obtener_nombre() << " ya existe, ingrese uno nuevo o ingrese 0 para volver al menu:" << endl;
+	int fila, columna;
 
-		getline(cin, nuevo_animal.nombre);
-	}
+	bool animal_rescatado = false;
 	
-	if (nuevo_animal.nombre != "0") {
-		system("clear");
+	do{
+		mapa.imprimir_terreno();
+		std::cout << "Fila: " << mapa.obtener_vehiculo()->obtener_posicion()->obtener_fila() << std::endl;
+		std::cout << "Columna: " << mapa.obtener_vehiculo()->obtener_posicion()->obtener_columna() << std::endl;
+		std::cout << "Ingrese a que fila desea desplazarse o -1 si desea cancelar." << std::endl;
+		std::cin >> fila;
+		if(fila!=-1){
+			mapa.floyd(8);
+			std::cout << "Ingrese a que columna desea desplazarse." << std::endl;
+			std::cin >> columna;
+			if(combustible > MINIMO){
+				mapa.obtener_vehiculo()->cambiar_posicion(fila, columna);
+				//Imprimir_viaje();
+				if(mapa.obtener_terreno()[mapa.obtener_vehiculo()->obtener_posicion()->obtener_fila()][mapa.obtener_vehiculo()->obtener_posicion()->obtener_columna()].hay_animal()){
+					string ignorar;
+					rescatado = mapa.obtener_terreno()[mapa.obtener_vehiculo()->obtener_posicion()->obtener_fila()][mapa.obtener_vehiculo()->obtener_posicion()->obtener_columna()].eliminar_animal();
+					std::cout << "Animal " << rescatado->obtener_nombre() << " con exito!" << std::endl;
+					std::cout << "Ingrese un dato para continuar..." << std::endl;
+					std::cin >> ignorar;
+					animal_rescatado = true;
+				}
+			} else {
+				std::cout << "No se cuenta con el combustible necesario para ir a la posicion ingresada, se necesitan: " /* coste_combustible */ << std::endl;
+			}
+			combustible -= 50;
+		}
+	}while(fila!=-1);
 
-		nuevo_animal.edad = ingresar_edad ();
+	if (animal_rescatado) {
+		if (diccionario.busqueda(diccionario.obtener_raiz(), rescatado->obtener_nombre()))
+			cout << "Dicho animal ya esta en la reserva no podemos agregarlo" << endl;
+		else {
+			diccionario.insertar(rescatado);
 		
-		system("clear");
-
-		nuevo_animal.tamanio = ingresar_tamanio ();
-		
-		system("clear");
-
-		nuevo_animal.especie = ingresar_especie ();
-		
-		system("clear");
-
-		nuevo_animal.personalidad = ingresar_personalidad ();
-
-		agregar_animal (nuevo_animal.especie, nuevo_animal);
-
-		cout << endl << nuevo_animal.nombre << " fue rescatado con exito." << endl;
-	}
+			cout << "El animal fue agregado con exito a la reserva" << endl;
+		}
+	}	
 
 	presionar_enter ();
 }
 
-void Menu::buscar () {
-	if (refugio.vacia())
-		cout << "El refugio no posee animales por el momento, no se puede realizar dicha accion." << endl;
-	else {
-		pasar_tiempo();
+void Menu::buscar () {	
+	system("clear");
 	
-		string nombre;
+	Nodo* temporal = diccionario.obtener_raiz();
 	
-		cout << endl << "Ingrese el nombre del animal:" << endl;
+	pasar_tiempo(temporal);
+	
+	cout << endl;
+
+	string nombre;
+	
+	cout << endl << "Ingrese el nombre del animal:" << endl;
 		
-		cin.ignore();
+	cin.ignore();
 		
-		getline(cin, nombre);
+	getline(cin, nombre);
 	
-		system("clear");
+	system("clear");
 	
-		if ( refugio.consulta(nombre) ) {
-			cout << "Nombre         Edad           Tamanio        Especie        Personalidad   Hambre         Higiene" << endl;
-			refugio.consulta(nombre)->caracteristicas();
+	Animal* animal = diccionario.busqueda(diccionario.obtener_raiz(), nombre);
+
+	if (animal) {
+		if (animal->obtener_adoptado())
+			cout << "Error dicho animal fue adoptado ya no se encuentra en el refugio." << endl;
+		else {
+			cout << "Nombre         Edad           Tamanio        Especie        Personalidad   Hambre         Higiene        Estado" << endl;
+			animal->caracteristicas();
 		}
-		else
-			cout << endl << "Error dicho animal no se encuentra en el refugio." << endl;
 	}
+	else
+		cout << endl << "Error dicho animal no se encuentra en el refugio." << endl;
+
 	presionar_enter ();
 }
 
 void Menu::cuidar () {
-	if (refugio.vacia())
-		cout << "El refugio no posee animales por el momento, no se puede realizar dicha accion." << endl;
-	else {
-		pasar_tiempo();
-		
-		int accion = 0;
+	system("clear");
+
+	Nodo* temporal = diccionario.obtener_raiz();
 	
-		while (accion != REGRESAR) {
-			mostrar_mini_menu ();
+	pasar_tiempo(temporal);
 	
-			accion = accion_mini_menu ();
+	cout <<	endl;
+
+	int accion = 0;
+
+	bool salir = false;
+
+	while (accion != REGRESAR && !salir) {
+		mostrar_mini_menu ();
+	
+		accion = accion_mini_menu ();
 			
-			switch (accion) {
-				case ELEGIR:
-					elegir_individualmente ();
+		if (accion == ELEGIR)
+			elegir_individualmente (diccionario.obtener_raiz(), salir);
 					
-					presionar_enter ();
+		presionar_enter ();
 	
-					system("clear");
-					break;
-				case ALIMENTAR:
-					alimentar_a_todos ();
-					
-					presionar_enter ();
-	
-					system("clear");
-					break;
-				case BANIAR:
-					baniar_a_todos ();
-					
-					presionar_enter ();
-	
-					system("clear");
-					break;
-				default :
-					presionar_enter ();
-			}
-		}
+		system("clear");
 	}
-}
+}	
+
 
 void Menu::adoptar () {
-	if (refugio.vacia())
-		cout << "El refugio no posee animales por el momento, no se puede realizar dicha accion." << endl;
-	else {
-		pasar_tiempo();
+	system("clear");
+
+	Nodo* temporal = diccionario.obtener_raiz();
+
+	pasar_tiempo(temporal);
+
+	cout << endl;
+
+	int espacio_disponible = ingresar_metros();
 		
-		int espacio_disponible = ingresar_metros();
+	int total_animales = 100;
+
+	int cantidad_adoptados = 0; // contador de animales a adoptar
 		
-		int total_animales = refugio.obtener_cantidad();
-		int cantidad_adoptados = 0; // contador de animales a adoptar
+	Animal** posibles_adoptados = new Animal*[total_animales]; // creo vector de punteros a animales, su tamaño es el total de animales existentes
+	Nodo* auxiliar = diccionario.obtener_raiz();
+
+	asignar_posibles_adoptados(auxiliar, espacio_disponible, posibles_adoptados, cantidad_adoptados);
 		
-		Animal** posibles_adoptados = new Animal*[total_animales]; // creo vector de punteros a animales, su tamaño es el total de animales existentes
+	ordenar_posibles_adoptados(posibles_adoptados, cantidad_adoptados);
 	
-		asignar_posibles_adoptados(espacio_disponible, posibles_adoptados, cantidad_adoptados);
-		
-		ordenar_posibles_adoptados(posibles_adoptados, cantidad_adoptados);
+	mostrar_posibles_adoptados(posibles_adoptados, cantidad_adoptados);
 	
-		mostrar_posibles_adoptados(posibles_adoptados, cantidad_adoptados);
+	int opcion = corroborar_adopcion (cantidad_adoptados);
 	
-		int opcion = corroborar_adopcion (cantidad_adoptados);
+	if (opcion >= 0) { // recorrer el arbol diccionario y encontrar el nodo que contenga el animal con el nombre de posibles_adoptados[opcion]
 		string nombre_animal_adoptar = posibles_adoptados[opcion] -> obtener_nombre();
-	
-		if (opcion >= 0) { // recorrer lista refugio y encontrar el nodo que contenga el animal con el nombre de posibles_adoptados[opcion]
 			
-			cout << "Has adoptado a: " << nombre_animal_adoptar << endl;
+		cout << "Has adoptado a: " << nombre_animal_adoptar << endl;
 			
-			/*
-			int i = 0;
-			while(nombre_animal_adoptar != nodo(i)->obtener_nombre() ){
-				i++;
-			}
-			
-			refugio.baja(i);
-			
-			*/
-	
-		}
-		
-		// libero memoria 
-		for(int i = cantidad_adoptados + 1; i < total_animales + 1; i++){
-			delete posibles_adoptados[i];
-		}
-		delete[] posibles_adoptados;
+		diccionario.busqueda(diccionario.obtener_raiz(), nombre_animal_adoptar) -> fue_adoptado();
 	}
+
+	// libero memoria 
+	for(int i = cantidad_adoptados + 1; i < total_animales + 1; i++)
+		delete posibles_adoptados[i];
+
+	delete[] posibles_adoptados;
+	
+	presionar_enter ();
+}
+
+void Menu::cargar_combustible () {
+	system("clear");
+
+	Nodo* temporal = diccionario.obtener_raiz();
+	
+	pasar_tiempo(temporal);
+
+	cout << endl;
+
+	if (combustible != MAXIMO) {
+		agregar_combustible(pedir_combustible());
+	
+		cout << "La carga fue realizada con exito" << endl;
+	}
+	else
+		cout << "El tanque esta lleno no puede agregarle mas combustible" << endl;
+	
 	presionar_enter ();
 }
 
@@ -205,24 +232,24 @@ bool Menu::guardar_salir () {
 	
 	if (!refugio_actualizado.is_open()){
 		cout << "Error al escribir el archivo." << endl;
-		return false;
+			return false;
 	}
-
-	Nodo* auxiliar = refugio.obtener_primero();
-
-	Animal* animal;
-
-	while (auxiliar != NULL) {
-		animal = ( auxiliar -> obtener_dato() );
-		
-		refugio_actualizado << animal -> obtener_nombre() << DELIMITADOR << animal -> obtener_edad() << DELIMITADOR << animal -> obtener_tamanio() << DELIMITADOR << (animal -> obtener_especie())[0] << DELIMITADOR << animal -> obtener_personalidad() << endl;
-
-		auxiliar = auxiliar -> obtener_siguiente();
-	}
+	
+	actualizar_archivo(diccionario.obtener_raiz(), refugio_actualizado);
 
 	refugio_actualizado.close();
 
 	return true;
+}
+
+bool Menu::clausurado () {
+	if (cancelado) {
+		Nodo* temporal = diccionario.obtener_raiz();
+	
+		clausurar(temporal);
+	}
+
+	return cancelado;
 }
 
 void Menu::presionar_enter () {
@@ -257,14 +284,31 @@ void Menu::validar_accion_menu (int &accion) {
 	}
 }
 
-void Menu::pasar_tiempo () {
-	Nodo* auxiliar = refugio.obtener_primero();
+void Menu::pasar_tiempo (Nodo* &actual) {
+	for (int i = 0; i < actual->obtener_cantidad_claves(); i++){
+		actual->obtener_clave(i)-> modificar_higiene_hambre();
+		agregar_combustible(5);
 
-	while (auxiliar != NULL) {
-		( auxiliar -> obtener_dato() )-> modificar_higiene_hambre();
+		if ((actual->obtener_clave(i)->obtener_hambre() == MAXIMO || actual->obtener_clave(i)->obtener_higiene() == MINIMO) && !actual->obtener_clave(i)->obtener_adoptado()) {
+			escapados++;
+			cout << "CUIDADO!!! Se escapo " << actual->obtener_clave(i)->obtener_nombre() << " de la reserva, en total ya se escaparon: " << escapados << endl;
+			actual->obtener_clave(i)->fue_adoptado();
 
-		auxiliar = auxiliar -> obtener_siguiente();
+			if (escapados == 3)
+				cancelado = true;
+		}
 	}
+
+    //Si no es hoja
+    if (!actual->sera_hoja()) {
+        //recorre los nodos para saber si tiene hijos
+        for (int j = 0; j <= actual->obtener_cantidad_claves(); j++) {
+            if (actual->obtener_hijo(j) != NULL) {
+                Nodo* auxiliar = actual->obtener_hijo(j);
+                pasar_tiempo(auxiliar);
+            }
+        }
+    }
 }
 
 void Menu::agregar_animal (char especie, Descripcion caracteristicas) {
@@ -293,7 +337,7 @@ void Menu::agregar_animal (char especie, Descripcion caracteristicas) {
 			animal = new Lagartija(caracteristicas.nombre, caracteristicas.edad, caracteristicas.tamanio, caracteristicas.personalidad);
 	}
 
-	refugio.alta(animal);
+	diccionario.insertar(animal);
 }
 
 void Menu::crear_refugio (ifstream &reserva) {
@@ -418,9 +462,7 @@ void Menu::validar_personalidad(string &personalidad_solicitada){
 
 void Menu::mostrar_mini_menu () {
 	cout << "1.\tElegir individualmente." << endl;
-	cout << "2.\tAlimentar a todos." << endl;
-	cout << "3.\tBaniar a todos." << endl;
-	cout << "4.\tRegresar al inicio." << endl;
+	cout << "2.\tRegresar al inicio." << endl;
 }
 
 int Menu::accion_mini_menu () {
@@ -434,55 +476,68 @@ int Menu::accion_mini_menu () {
 void Menu::validar_accion_mini_menu (int &accion) {
 	while ( (accion < ELEGIR) || (accion > REGRESAR) ) {
 		system("clear");
-
+		
 		cout << "Error opcion invalida." << endl << endl;
 		
 		mostrar_mini_menu();
-
+		
 		accion = pedir_accion();
 	}
 }
 
-void Menu::elegir_individualmente () {
-	Nodo* auxiliar = refugio.obtener_primero();
-	
-	Animal* mascota;
-	
+void Menu::elegir_individualmente (Nodo* actual, bool &salir) {
 	system("clear");
 
-	while (auxiliar != NULL) {
-		mascota = auxiliar -> obtener_dato();
+	int contador = 0;
+	
+	while (contador < actual->obtener_cantidad_claves() && !salir){
+		if (!actual->obtener_clave(contador)->obtener_adoptado()) {
+			cout << "Nombre         Edad           Tamanio        Especie        Personalidad   Hambre         Higiene        Estado" << endl;
+			
+			actual->obtener_clave(contador)->caracteristicas();
 		
-		cout << "Nombre         Edad           Tamanio        Especie        Personalidad   Hambre         Higiene" << endl;
-
-		mascota -> caracteristicas();
-
-		cout << endl << "1. Alimentar." << endl;
-		cout << "2. Baniar." << endl;
-		cout << "3. Saltear." << endl << endl;
-		
-		switch (accion_individual()) {
-			case PRIMERA_OPCION:
-				cout << endl;
-				mascota -> alimentar();
-				mascota -> fue_alimentado();
+			cout << endl << "1. Alimentar." << endl;
+			cout << "2. Baniar." << endl;
+			cout << "3. Saltear." << endl;
+			cout << "4. Regresar al menu principal." << endl << endl;
 				
-				cout << endl << "Accion realizada con exito." << endl;
-				break;
-			case SEGUNDA_OPCION:
-				cout << endl;
-				mascota -> baniar();
-				mascota -> se_bania();
-
-				cout << "Accion realizada con exito." << endl;
-				break;
-			default:
-				auxiliar = auxiliar -> obtener_siguiente();
+			switch (accion_individual()) {
+				case PRIMERA_OPCION:
+					cout << endl;
+					actual->obtener_clave(contador)->alimentar();
+					actual->obtener_clave(contador)->fue_alimentado();
+							
+					cout << endl << "Accion realizada con exito." << endl;
+					break;
+				case SEGUNDA_OPCION:
+					cout << endl;
+					actual->obtener_clave(contador)->baniar();
+					actual->obtener_clave(contador)->se_bania();
+		
+					cout << "Accion realizada con exito." << endl;
+					break;
+				case TERCERA_OPCION:
+					break;
+				default:
+					salir = true;
+			}
+		
+			presionar_enter();
 		}
-
-		presionar_enter();
-
+		
+		contador++;
+	
 		system("clear");
+	}
+
+	if (!actual->sera_hoja() && !salir) {
+		int contador_secundario = 0;
+
+		while (contador_secundario <= actual->obtener_cantidad_claves() && !salir) {
+		    if (actual->obtener_hijo(contador_secundario) != NULL)
+	   		    elegir_individualmente(actual->obtener_hijo(contador_secundario), salir);
+	   		contador_secundario++;
+		}
 	}
 }
 
@@ -495,48 +550,80 @@ int Menu::accion_individual () {
 }
 
 void Menu::validar_accion_individual (int &accion) {
-	while ( (accion < PRIMERA_OPCION) || (accion > SALTEAR) ) {
+	while ( (accion < PRIMERA_OPCION) || (accion > CUARTA_OPCION) ) {
 		cout << "Error opcion invalida." << endl << endl;
 
 		accion = pedir_accion();
 	}
 }
 
-void Menu::alimentar_a_todos () {
-	Nodo* auxiliar = refugio.obtener_primero();
-	
-	Animal* mascota;
-	
-	system("clear");
-	cout << "Todos los animales fueron alimentados." << endl << endl;
+void Menu::actualizar_archivo (Nodo* actual, ofstream &refugio_actualizado) {
+	for (int i = 0; i < actual->obtener_cantidad_claves(); i++){
+		if (!actual->obtener_clave(i) -> obtener_adoptado())
+			refugio_actualizado << (actual->obtener_clave(i) -> obtener_nombre()) << DELIMITADOR << (actual->obtener_clave(i) -> obtener_edad()) << DELIMITADOR << (actual->obtener_clave(i) -> obtener_tamanio()) << DELIMITADOR << ((actual->obtener_clave(i) -> obtener_especie())[0]) << DELIMITADOR << (actual->obtener_clave(i) -> obtener_personalidad()) << endl;
+	}
 
-	while (auxiliar != NULL) {
-		mascota = auxiliar -> obtener_dato();
-		mascota -> alimentar();
-		mascota -> fue_alimentado();
+    //Si no es hoja
+    if (!actual->sera_hoja()) {
+        //recorre los nodos para saber si tiene hijos
+        for (int j = 0; j <= actual->obtener_cantidad_claves(); j++) {
+            if (actual->obtener_hijo(j) != NULL)
+                actualizar_archivo(actual->obtener_hijo(j), refugio_actualizado);
+        }
+    }
+}
 
-		cout << endl;
+void Menu::validar_combustible (int &carga) {
+	while (carga <= MINIMO || (combustible + carga) > MAXIMO ) {
+		if (carga <= MINIMO)
+			cout << "No puede quitarle o no agregarle combustible al tanque" << endl;
+		else
+			cout << "El combustible que quiere agregar excede el limite del tanque reduzca su pedido" << endl;
+		
+		cout << "Ingrese nuevamente la cantidad de combustible que desea agregar. Recuerde que ya hay una cantidad de " << combustible << endl;
 
-		auxiliar = auxiliar -> obtener_siguiente();
+		cin >> carga;
+
+		system("clear");
 	}
 }
 
-void Menu::baniar_a_todos () {
-	Nodo* auxiliar = refugio.obtener_primero();
-	
-	Animal* mascota;
-	
+int Menu::pedir_combustible () {
+	int carga;
+
+	cout << "El combustible actual es: " << combustible << endl;
+	cout << "Ingrese la cantidad de combustible que desea agregar" << endl;
+
+	cin >> carga;
+
 	system("clear");
 
-	cout << "Todos los animales fueron baniados." << endl << endl;
-	
-	while (auxiliar != NULL) {
-		mascota = auxiliar -> obtener_dato();
-		mascota -> baniar();
-		mascota -> se_bania();
+	validar_combustible (carga);
 
-		auxiliar = auxiliar -> obtener_siguiente();
-	}
+	return carga;
+}
+
+void Menu::agregar_combustible (int carga) {
+	combustible += carga;
+
+	if (combustible > MAXIMO)
+		combustible = MAXIMO;
+}
+
+void Menu::clausurar (Nodo* &actual) {
+	for (int i = 0; i < actual->obtener_cantidad_claves(); i++)
+		actual->obtener_clave(i)->fue_adoptado();
+
+    //Si no es hoja
+    if (!actual->sera_hoja()) {
+        //recorre los nodos para saber si tiene hijos
+        for (int j = 0; j <= actual->obtener_cantidad_claves(); j++) {
+            if (actual->obtener_hijo(j) != NULL) {
+                Nodo* auxiliar = actual->obtener_hijo(j);
+                clausurar(auxiliar);
+            }
+        }
+    }
 }
 
 int Menu::ingresar_metros () {
@@ -555,40 +642,49 @@ int Menu::ingresar_metros () {
 	return metros;
 }
 
-void Menu::asignar_posibles_adoptados (int espacio_disponible, Animal** posibles_adoptados, int &cantidad_adoptados) {
-	Nodo* auxiliar = refugio.obtener_nodo(0); // inicializo nodo
-	Animal* mascota = auxiliar -> obtener_dato();
+void Menu::asignar_posibles_adoptados (Nodo* actual, int espacio_disponible, Animal** posibles_adoptados, int &cantidad_adoptados) {
+	Animal* mascota;
 
-	while (auxiliar != NULL) {
-		mascota = auxiliar -> obtener_dato(); // obtengo el objeto animal a guardar en el vector posibles_adoptados
-		
-		if (espacio_disponible < ESPACIO_INFERIOR) {
-			if (mascota -> obtener_tamanio() == DIMINUTO || mascota -> obtener_tamanio() == PEQUENIO) {
-				posibles_adoptados[cantidad_adoptados] = mascota;
-				cantidad_adoptados++;
-			}
-		}
-		else if (espacio_disponible >= ESPACIO_INFERIOR && espacio_disponible < ESPACIO_INTERMEDIO) {
-			if(mascota -> obtener_tamanio() == DIMINUTO || mascota -> obtener_tamanio() == PEQUENIO || mascota -> obtener_tamanio() == MEDIANO) {
-				posibles_adoptados[cantidad_adoptados] = mascota;
-				cantidad_adoptados++;
-			}
-		}
-		else if (espacio_disponible >= ESPACIO_INTERMEDIO && espacio_disponible < ESPACIO_SUPERIOR) {
-			if (mascota -> obtener_tamanio() == DIMINUTO || mascota -> obtener_tamanio() == PEQUENIO || mascota -> obtener_tamanio() == MEDIANO || mascota -> obtener_tamanio() == GRANDE) {
-				posibles_adoptados[cantidad_adoptados] = mascota;
-				cantidad_adoptados++;
-			}
-		}
-		else { 
-				posibles_adoptados[cantidad_adoptados] = mascota;
-				cantidad_adoptados++;
-		}
-		auxiliar = auxiliar -> obtener_siguiente();
+	for (int i = 0; i < actual->obtener_cantidad_claves(); i++) {
+	    mascota = actual->obtener_clave(i);
+	
+	    if (!mascota -> obtener_adoptado()){
+	    	if (espacio_disponible < ESPACIO_INFERIOR) {
+	    		if (mascota -> obtener_tamanio() == DIMINUTO || mascota -> obtener_tamanio() == PEQUENIO) {
+	    			posibles_adoptados[cantidad_adoptados] = mascota;
+	    			cantidad_adoptados++;
+	    		}
+	    	}
+	    	else if (espacio_disponible >= ESPACIO_INFERIOR && espacio_disponible < ESPACIO_INTERMEDIO) {
+	    		if(mascota -> obtener_tamanio() == DIMINUTO || mascota -> obtener_tamanio() == PEQUENIO || mascota -> obtener_tamanio() == MEDIANO) {
+	    			posibles_adoptados[cantidad_adoptados] = mascota;
+	    			cantidad_adoptados++;
+	    		}
+	    	}
+	    	else if (espacio_disponible >= ESPACIO_INTERMEDIO && espacio_disponible < ESPACIO_SUPERIOR) {
+	    		if (mascota -> obtener_tamanio() == DIMINUTO || mascota -> obtener_tamanio() == PEQUENIO || mascota -> obtener_tamanio() == MEDIANO || mascota -> obtener_tamanio() == GRANDE) {
+	    			posibles_adoptados[cantidad_adoptados] = mascota;
+	    			cantidad_adoptados++;
+	    		}
+	    	}
+	    	else { 
+	    			posibles_adoptados[cantidad_adoptados] = mascota;
+	    			cantidad_adoptados++;
+	    	}
+	    }
 	}
+
+    //Si no es hoja
+    if (!actual->sera_hoja()) {
+        //recorre los nodos para saber si tiene hijos
+        for (int j = 0; j <= actual->obtener_cantidad_claves(); j++) {
+            if (actual->obtener_hijo(j) != NULL)
+                asignar_posibles_adoptados(actual->obtener_hijo(j), espacio_disponible, posibles_adoptados, cantidad_adoptados);
+        }
+    }
 }
 
-void ordenar_posibles_adoptados(Animal** posibles_adoptados, int cantidad_adoptados){
+void Menu::ordenar_posibles_adoptados(Animal** posibles_adoptados, int cantidad_adoptados){
 	
 	Animal* mascota_insertar;
 	int contador_aux;
@@ -608,12 +704,13 @@ void ordenar_posibles_adoptados(Animal** posibles_adoptados, int cantidad_adopta
 }
 
 void Menu::mostrar_posibles_adoptados (Animal** posibles_adoptados, int cantidad_adoptados) {
-	system("clear");
+	//system("clear");
 	
-	cout << "\tNombre         Edad           Tamanio        Especie        Personalidad   Hambre         Higiene" << endl;
-	for (int i = 0; i < (cantidad_adoptados + 1); i++) {
+	cout << "\tNombre         Edad           Tamanio        Especie        Personalidad   Hambre         Higiene        Estado" << endl;
+	for (int i = 0; i < (cantidad_adoptados); i++) {
 		cout << i << "\t";
 		posibles_adoptados[i] -> caracteristicas();
+	}	
 }
 
 int Menu::corroborar_adopcion (int comparador) {
@@ -623,8 +720,8 @@ int Menu::corroborar_adopcion (int comparador) {
 
 	cin >> opcion;
 
-	while (opcion > comparador || opcion < MINIMO) {
-		cout << "Erro opcion invalida." << endl;
+	while (opcion > comparador || opcion < (MINIMO - 1)) {
+		cout << "Error opcion invalida." << endl;
 		cout << "Ingrese el numero correspondiente al animal que desea adoptar o si quiere cancelar la opcion ingrese -1" << endl;
 		cin >> opcion;
 	}

@@ -1,29 +1,38 @@
 #ifndef __VEHICULO__
 #define __VEHICULO__
-#include "lista.h"
-#include "mapa.h"
 #include <iostream>
-
-const int INFINITO = -1;
-const int COSTE_CAMINO = 1;
-const int COSTE_TIERRA = 2;
-const int COSTE_MONTANIA = 5;
-const int COSTE_PRECIPICIO = 40;
+#include "lista.h"
 
 class Vehiculo{
     //Atributos
 private:
     int combustible;
     Coordenada posicion;
-    Mapa mapa;
 
     //Metodos
 public:
-    void cargar_combustible();
-    int obtener_coste_baldosa();
+    //pre: -
+    //pos: Aumenta combustible en carga_combustible.
+    void cargar_combustible(int carga_combustible);
+
+    //
+    //
     void desplazarse(); //-> pide fila y columna -> puede? si - muestra camino / no - otro lugar o cancelar?
-    void dijkstras(Baldosa baldosas[ALTO_TERRENO][ANCHO_TERRENO], Coordenada posicion_inicio);
-    bool puede_llegar( Coordenada posicion_destino);
-    void cambiar_posicion ( Coordenada nueva_posicion);
+    
+    //
+    //
+    bool puede_llegar(Coordenada posicion_destino);
+    
+    //pre: -
+    //pos: Cambia la posicion a nueva_posicion.
+    void cambiar_posicion(Coordenada nueva_posicion);
+
+    //pre: -
+    //pos: Cambia la posicion a Coordenada(fila, columna).
+    void cambiar_posicion(int fila, int columna);
+    
+    //pre: -
+    //pos: Devuelve un puntero a posicion.
+    Coordenada* obtener_posicion();
 };
 #endif
